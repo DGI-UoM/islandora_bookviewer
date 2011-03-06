@@ -124,7 +124,7 @@ br.getPageURI = function(index, reduce, rotate) {
     var leafStr = br.structMap[index+1];//get the pid of the object from the struct map islandora specific
     var imgStr = (index+1).toString();
     //url below must be changed for now for each install
-    var url = 'http://localhost:8080/adore-djatoka/resolver?url_ver=Z39.88-2004&rft_id=http://localhost/drupal/fedora/repository/'+leafStr+'/JP2/outofthinair&svc_id=info:lanl-repo/svc/getRegion&svc_val_fmt=info:ofi/fmt:kev:mtx:jpeg2000&svc.format=image/png&svc.level=5&svc.rotate=0&svc.region=0,0,32001,4800';
+    var url = 'http://localhost:8080/adore-djatoka/resolver?url_ver=Z39.88-2004&rft_id=http://localhost/drupal/fedora/repository/'+leafStr+'/JP2/outofthinair&svc_id=info:lanl-repo/svc/getRegion&svc_val_fmt=info:ofi/fmt:kev:mtx:jpeg2000&svc.format=image/png&svc.level=5&svc.rotate=0&svc.region=0,0,1600,2400';
     return url;
 }
 
