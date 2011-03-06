@@ -55,7 +55,9 @@ function results_to_array($results){
     }
     return $returnArray;
 }
-
+//instead of rely on pid or title for ordering we store the page number in
+//the rels-ext with a predicate of <info:islandora/islandora-system:def/pageinfo#isPageNumber>
+//we then populate an array page numbers as the key and pids as the value
 $query_string = 'select $object $page from <#ri>
 where $object <fedora-rels-ext:isMemberOf> <info:fedora/'.$_GET["pid"] .'>
 and $object <fedora-model:state> <info:fedora/fedora-system:def/model#Active>
@@ -178,6 +180,7 @@ br.numLeafs = <?php echo count($query_array);?>;
 
 // Book title and the URL used for the book title link
 br.bookTitle=  '<?php echo $_GET['label'];?>';
+//book url should be created dynamically 
 br.bookUrl  = 'http://syn.lib.umanitoba.ca';
 
 // Override the path used to find UI images
