@@ -80,6 +80,10 @@
     background-color: rgb(234, 226, 205);
 }
 
+.BRpagetext{
+    background-color: rgb(234, 226, 205); 
+}
+
 .BRleafEdgeR {
     border-style: solid solid solid none;
     border-color: rgb(51, 51, 34);
