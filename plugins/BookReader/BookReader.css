@@ -81,7 +81,10 @@
 }
 
 .BRpagetext{
-    background-color: rgb(234, 226, 205); 
+    padding: 7px 7px 7px 7px;
+    background-color: rgb(234, 226, 205);
+    overflow: auto;
+    font-family: verdana, arial, sans-serif;
 }
 
 .BRleafEdgeR {

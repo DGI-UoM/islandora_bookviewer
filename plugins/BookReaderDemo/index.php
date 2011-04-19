@@ -128,6 +128,23 @@ br.getPageURI = function(index, reduce, rotate) {
     return url;
 }
 
+br.getPageText = function (index){
+    var leafStr = br.structMap[index+1];//get the pid of the object from the struct map islandora specific
+    var imgStr = (index+1).toString();
+    //url below must be changed for now for each install
+  
+   $.get("http://localhost/drupal/fedora/repository/"+leafStr+"/OCR", function(result){
+    $("div").html(result);
+  });
+   
+ //using drupal url if we wanted to go directly to fedora would have to use curl crossdomain issues
+   
+}
+br.getPid = function (index){
+   var leafStr = br.structMap[index+1];//get the pid of the object from the struct map islandora specific
+   return leafStr;
+}
+
 // Return which side, left or right, that a given page should be displayed on
 br.getPageSide = function(index) {
     if (0 == (index & 0x1)) {
@@ -171,8 +188,9 @@ br.getSpreadIndices = function(pindex) {
 //
 // For example, index 5 might correspond to "Page 1" if there is front matter such
 // as a title page and table of contents.
+// for now we just show the image number
 br.getPageNum = function(index) {
-    return index+1;
+    return index;
 }
 
 // Total number of leafs

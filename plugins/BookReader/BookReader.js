@@ -52,6 +52,7 @@ function BookReader() {
     //this.indicesToDisplay = [];
     this.imgs = {};
     this.prefetchedImgs = {}; //an object with numeric keys cooresponding to page index
+    this.prefetchedTexts = {};//islandora specific
     this.structMap = null;  //islandora specific must be set in init. map of page numbers to pids
     this.timer     = null;
     this.animating = false;
@@ -338,126 +339,6 @@ BookReader.prototype.setClickHandler2UP = function( element, data, handler) {
     $(element).unbind('tap').bind('tap', data, function(e) {
         handler(e);
     });
-}
-//draw leaf with text
-//______________________________________________________
-BookReader.prototype.drawLeafWitText = function() {
-    //alert('drawing leafs!');
-    this.timer = null;
-
-
-    var scrollTop = $('#BRcontainer').attr('scrollTop');
-    var scrollBottom = scrollTop + $('#BRcontainer').height();
-    //console.log('top=' + scrollTop + ' bottom='+scrollBottom);
-
-    var indicesToDisplay = [];
-
-    var i;
-    var leafTop = 0;
-    var leafBottom = 0;
-    for (i=0; i<this.numLeafs; i++) {
-        var height  = parseInt(this._getPageHeight(i)/this.reduce);
-
-        leafBottom += height;
-        //console.log('leafTop = '+leafTop+ ' pageH = ' + this.pageH[i] + 'leafTop>=scrollTop=' + (leafTop>=scrollTop));
-        var topInView    = (leafTop >= scrollTop) && (leafTop <= scrollBottom);
-        var bottomInView = (leafBottom >= scrollTop) && (leafBottom <= scrollBottom);
-        var middleInView = (leafTop <=scrollTop) && (leafBottom>=scrollBottom);
-        if (topInView | bottomInView | middleInView) {
-            //console.log('displayed: ' + this.displayedIndices);
-            //console.log('to display: ' + i);
-            indicesToDisplay.push(i);
-        }
-        leafTop += height +10;
-        leafBottom += 10;
-    }
-
-    var firstIndexToDraw  = indicesToDisplay[0];
-    this.firstIndex      = firstIndexToDraw;
-
-    // Update hash, but only if we're currently displaying a leaf
-    // Hack that fixes #365790
-    if (this.displayedIndices.length > 0) {
-        this.updateLocationHash();
-    }
-
-    if ((0 != firstIndexToDraw) && (1 < this.reduce)) {
-        firstIndexToDraw--;
-        indicesToDisplay.unshift(firstIndexToDraw);
-    }
-
-    var lastIndexToDraw = indicesToDisplay[indicesToDisplay.length-1];
-    if ( ((this.numLeafs-1) != lastIndexToDraw) && (1 < this.reduce) ) {
-        indicesToDisplay.push(lastIndexToDraw+1);
-    }
-
-    leafTop = 0;
-    var i;
-    for (i=0; i<firstIndexToDraw; i++) {
-        leafTop += parseInt(this._getPageHeight(i)/this.reduce) +10;
-    }
-
-    //var viewWidth = $('#BRpageview').width(); //includes scroll bar width
-    var viewWidth = $('#BRcontainer').attr('scrollWidth');
-
-
-    for (i=0; i<indicesToDisplay.length; i++) {
-        var index = indicesToDisplay[i];
-        var height  = parseInt(this._getPageHeight(index)/this.reduce);
-
-        if (BookReader.util.notInArray(indicesToDisplay[i], this.displayedIndices)) {
-            var width   = parseInt(this._getPageWidth(index)/this.reduce);
-            //console.log("displaying leaf " + indicesToDisplay[i] + ' leafTop=' +leafTop);
-            var div = document.createElement("div");
-            div.className = 'BRpagediv1up';
-            div.id = 'pagediv'+index;
-            div.style.position = "absolute";
-            $(div).css('top', leafTop + 'px');
-            var left = (viewWidth-width)>>1;
-            if (left<0) left = 0;
-            $(div).css('left', left+'px');
-            $(div).css('width', width+'px');
-            $(div).css('height', height+'px');
-            //$(div).text('loading...');
-
-            $('#BRpageview').append(div);
-
-            var img = document.createElement("img");
-            img.src = this._getPageURI(index, this.reduce, 0);
-            $(img).css('width', width+'px');
-            $(img).css('height', height+'px');
-            $(div).append(img);
-
-        } else {
-            //console.log("not displaying " + indicesToDisplay[i] + ' score=' + jQuery.inArray(indicesToDisplay[i], this.displayedIndices));
-        }
-
-        leafTop += height +10;
-
-    }
-
-    for (i=0; i<this.displayedIndices.length; i++) {
-        if (BookReader.util.notInArray(this.displayedIndices[i], indicesToDisplay)) {
-            var index = this.displayedIndices[i];
-            //console.log('Removing leaf ' + index);
-            //console.log('id='+'#pagediv'+index+ ' top = ' +$('#pagediv'+index).css('top'));
-            $('#pagediv'+index).remove();
-        } else {
-            //console.log('NOT Removing leaf ' + this.displayedIndices[i]);
-        }
-    }
-
-    this.displayedIndices = indicesToDisplay.slice();
-    this.updateSearchHilites();
-
-    if (null != this.getPageNum(firstIndexToDraw))  {
-        $("#BRpagenum").val(this.getPageNum(this.currentIndex()));
-    } else {
-        $("#BRpagenum").val('');
-    }
-
-    this.updateToolbarZoom(this.reduce);
-
 }
 
 // drawLeafsOnePage()
@@ -877,13 +758,20 @@ BookReader.prototype.lazyLoadImage = function (dummyImage) {
 // drawLeafsTwoPage()
 //______________________________________________________________________________
 BookReader.prototype.drawLeafsTwoPageWithText = function() {
+    console.log('drawLeafsTwoPageWithText ');
     var scrollTop = $('#BRtwopageview').attr('scrollTop');
     var scrollBottom = scrollTop + $('#BRtwopageview').height();
     
     // $$$ we should use calculated values in this.twoPage (recalc if necessary)
     
-    var indexL = this.twoPage.currentIndexL;
-    
+   // var indexL = this.twoPage.currentIndexL;
+   
+    //var indexL = this.twoPage.currentIndexL;
+    var indexL = parseInt($("#BRpagenum").val(),10);
+    if(indexL < this.firstDisplayableIndex() || indexL > this.lastDisplayableIndex){
+        return;
+    }
+    this.setCurrentIndex(indexL);
     var heightL  = this._getPageHeight(indexL); 
     var widthL   = this._getPageWidth(indexL);
 
@@ -899,6 +787,15 @@ BookReader.prototype.drawLeafsTwoPageWithText = function() {
 
     this.twoPage.scaledWL = this.getPageWidth2UP(indexL);
     this.twoPage.gutter = this.twoPageGutter();
+
+     //var indexR = this.twoPage.currentIndexR;
+    var indexR = indexL;
+    var heightR  = this._getPageHeight(indexR);
+    var widthR   = this._getPageWidth(indexR);
+
+    // $$$ should use getwidth2up?
+    //var scaledWR = this.twoPage.height*widthR/heightR;
+    this.twoPage.scaledWR = this.getPageWidth2UP(indexR);
     
     this.prefetchImg(indexL);
     $(this.prefetchedImgs[indexL]).css({
@@ -911,33 +808,32 @@ BookReader.prototype.drawLeafsTwoPageWithText = function() {
         borderRight: '1px solid black',
         zIndex: 2
     }).appendTo('#BRtwopageview');
-    
-    var indexR = this.twoPage.currentIndexR;
-    var heightR  = this._getPageHeight(indexR); 
-    var widthR   = this._getPageWidth(indexR);
-
-    // $$$ should use getwidth2up?
-    //var scaledWR = this.twoPage.height*widthR/heightR;
-    this.twoPage.scaledWR = this.getPageWidth2UP(indexR);
-    this.prefetchText(indexR);
-    $(this.prefetchedImgs[indexR]).css({
+     $(this.prefetchedImgs[indexR]).empty();
+   //this.prefetchText(indexR);
+    var scale = this.twoPage.scaledWR;
+    var fontSize = parseFloat(scale/720);
+   this.prefetchText(indexL);
+    $(this.prefetchedTexts[indexL]).css({
         position: 'absolute',
         left:   this.twoPage.gutter+'px',
         right: '',
         top:    top+'px',
         height: this.twoPage.height + 'px', // $$$ height forced the same for both pages
         width:  this.twoPage.scaledWR + 'px',
+        "font-size": fontSize +'em',
         borderLeft: '1px solid black',
         zIndex: 2
     }).appendTo('#BRtwopageview');
         console.log('mode = ' + this.mode );
 
-    this.displayedIndices = [this.twoPage.currentIndexL, this.twoPage.currentIndexR];
+
+    //this.displayedIndices = [this.twoPage.currentIndexL, this.twoPage.currentIndexR];
     this.setMouseHandlers2UP();
     this.twoPageSetCursor();
-
-    //this.updatePageNumBox2UP();
+    this.updatePageNumBox2UPWithText();
+    this.updateLocationHash();
     this.updateToolbarZoom(this.reduce);
+   
     
     // this.twoPagePlaceFlipAreas();  // No longer used
 
@@ -1012,6 +908,16 @@ BookReader.prototype.drawLeafsTwoPage = function() {
     // this.twoPagePlaceFlipAreas();  // No longer used
 
 }
+
+// updatePageNumBox2UP
+//______________________________________________________________________________
+BookReader.prototype.updatePageNumBox2UPWithText = function() {
+        //$("#BRpagenum").val(1);
+        $("#BRpagenum").val(this.getPageNum(this.currentIndex()));
+  
+    this.updateLocationHash();
+}
+
 
 // updatePageNumBox2UP
 //______________________________________________________________________________
@@ -2346,8 +2252,29 @@ BookReader.prototype._scrollAmount = function() {
 //______________________________________________________________________________
 // to flip back one spread, pass index=null
 BookReader.prototype.flipBackToIndex = function(index) {
-    
-    if (1 == this.mode) return;
+console.log('flipBactToIndex ');
+if (1 == this.mode) return;
+ if(4 == this.mode){
+      if ('rl' != this.pageProgression) {
+        // Assume LTR and we are going backward
+         var leftIndex = parseInt($("#BRpagenum").val(),10)-1;
+    } else {
+        // RTL and going backward
+        var leftIndex = parseInt($("#BRpagenum").val(),10)+1;
+    }
+       
+      if (null == index ){
+          index = leftIndex;
+    }
+    if(index < this.firstDisplayableIndex() || index > this.lastDisplayableIndex){
+        return;
+    }
+    this.setCurrentIndex(index);
+     if (index > this.lastDisplayableIndex()) return;
+        this.updatePageNumBox2UPWithText();
+       this.drawLeafs();
+       return;
+    }
 
     var leftIndex = this.twoPage.currentIndexL;
     
@@ -2361,6 +2288,7 @@ BookReader.prototype.flipBackToIndex = function(index) {
     if (null == index) {
         index = leftIndex-2;
     }
+   
     //if (index<0) return;
     
     var previousIndices = this.getSpreadIndices(index);
@@ -2380,13 +2308,15 @@ BookReader.prototype.flipBackToIndex = function(index) {
         var gutter = this.prepareFlipRightToLeft(previousIndices[0], previousIndices[1]);
         this.flipRightToLeft(previousIndices[0], previousIndices[1], gutter);
     }
+   
 }
 
 // flipLeftToRight()
 //______________________________________________________________________________
 // Flips the page on the left towards the page on the right
 BookReader.prototype.flipLeftToRight = function(newIndexL, newIndexR) {
-
+   console.log('flipLeftToRight ');
+   console.log('indexL ' + newIndexL + 'indexR ' + newIndexR);
     var leftLeaf = this.twoPage.currentIndexL;
     
     var oldLeafEdgeWidthL = this.leafEdgeWidth(this.twoPage.currentIndexL);
@@ -2513,7 +2443,11 @@ BookReader.prototype.flipLeftToRight = function(newIndexL, newIndexR) {
             self.animating = false;
             
             self.updateSearchHilites2UP();
-            self.updatePageNumBox2UP();
+             if(4 == this.mode){
+                self.updatePageNumBox2UPWithText();
+            } else {
+              self.updatePageNumBox2UP();
+            }
             
             // self.twoPagePlaceFlipAreas(); // No longer used
             self.setMouseHandlers2UP();
@@ -2535,6 +2469,27 @@ BookReader.prototype.flipLeftToRight = function(newIndexL, newIndexR) {
 BookReader.prototype.flipFwdToIndex = function(index) {
 
     if (this.animating) return;
+     if(4 == this.mode){
+       if ('rl' != this.pageProgression) {
+        // Assume LTR and we are going backward
+         var indexL = parseInt($("#BRpagenum").val(),10)+1;
+    } else {
+        // RTL and going backward
+        var indexL = parseInt($("#BRpagenum").val(),10)-1;
+    }
+      if (null == index ){
+         index = indexL;
+         //var indexL = this.twoPage.currentIndexL;
+    }
+     if(index < this.firstDisplayableIndex() || index > this.lastDisplayableIndex){
+        return;
+    }
+    this.setCurrentIndex(index);
+     if (index > this.lastDisplayableIndex()) return;
+      this.updatePageNumBox2UPWithText();
+      this.drawLeafs();
+       return;
+    }
 
     if (null != this.leafEdgeTmp) {
         alert('error: leafEdgeTmp should be null!');
@@ -2544,6 +2499,7 @@ BookReader.prototype.flipFwdToIndex = function(index) {
     if (null == index) {
         index = this.twoPage.currentIndexR+2; // $$$ assumes indices are continuous
     }
+   
     if (index > this.lastDisplayableIndex()) return;
 
     this.animating = true;
@@ -2561,6 +2517,9 @@ BookReader.prototype.flipFwdToIndex = function(index) {
         var gutter = this.prepareFlipLeftToRight(nextIndices[0], nextIndices[1]);
         this.flipLeftToRight(nextIndices[0], nextIndices[1]);
     }
+    if(4 == this.mode){
+       this.drawLeafs();
+    }
 }
 
 // flipRightToLeft(nextL, nextR, gutter)
@@ -2568,6 +2527,7 @@ BookReader.prototype.flipFwdToIndex = function(index) {
 //______________________________________________________________________________
 // Flip from left to right and show the nextL and nextR indices on those sides
 BookReader.prototype.flipRightToLeft = function(newIndexL, newIndexR) {
+    console.log('indexL ' + newIndexL + 'indexR ' + newIndexR);
     var oldLeafEdgeWidthL = this.leafEdgeWidth(this.twoPage.currentIndexL);
     var oldLeafEdgeWidthR = this.twoPage.edgeWidth-oldLeafEdgeWidthL;
     var newLeafEdgeWidthL = this.leafEdgeWidth(newIndexL);  
@@ -2641,7 +2601,11 @@ BookReader.prototype.flipRightToLeft = function(newIndexL, newIndexR) {
 
 
             self.updateSearchHilites2UP();
-            self.updatePageNumBox2UP();
+            if(4 == this.mode){
+                self.updatePageNumBox2UPWithText();
+            } else {
+              self.updatePageNumBox2UP();
+            }
             
             // self.twoPagePlaceFlipAreas(); // No longer used
             self.setMouseHandlers2UP();     
@@ -2654,6 +2618,8 @@ BookReader.prototype.flipRightToLeft = function(newIndexL, newIndexR) {
         });
     });    
 }
+
+
 
 // setMouseHandlers2UP
 //______________________________________________________________________________
@@ -2682,18 +2648,25 @@ BookReader.prototype.setMouseHandlers2UP = function() {
 //______________________________________________________________________________
 BookReader.prototype.prefetchText = function(index) {
     var pageURI = this._getPageURI(index);
+    
+    
+     var loadText = false;
+    if (undefined == this.prefetchedTexts[index]) {
+        //console.log('no image for ' + index);
+        loadText = true;
+    }
 
-    // Load image if not loaded or URI has changed (e.g. due to scaling)
 
-
-
+    if (loadText) {
         //console.log('prefetching ' + index);
-        var textDiv = document.createElement("div");
-        textDiv.className = 'BRpagetext';
-        textDiv.innerHTML = 'this is a test with a really long string QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ QQQQQQQQQQQQGGG GGGGGGGGGGG GGGGGGGHHHHGFFF FFRRR RFFFF';
-         this.prefetchedImgs[index] = textDiv;
-
-
+       var pid = this.getPid(index);
+    div = document.createElement('div');
+    div.id = 'BRpagetext';
+    div.className = 'BRpagetext';// browser may rewrite src so we stash raw URI here
+    $(div).load("http://localhost/drupal/fedora/repository/"+pid+"/OCR");
+    this.prefetchedTexts[index] = div;
+    }
+    
 }
 
 
@@ -2716,7 +2689,7 @@ BookReader.prototype.prefetchImg = function(index) {
     if (loadImage) {
         //console.log('prefetching ' + index);
         var img = document.createElement("img");
-        img.className = 'BRpageimage';
+        img.className = 'BRpageimage'
         if (index < 0 || index > (this.numLeafs - 1) ) {
             // Facing page at beginning or end, or beyond
             $(img).css({
