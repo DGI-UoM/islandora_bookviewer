@@ -1,5 +1,9 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <?php
+//update the three define statements below with your own urls
+define("DJATOKA_PREFIX", "http://localhost:8080/adore-djatoka/resolver?url_ver=Z39.88-2004&rft_id=");
+define("ISLANDORA_PREFIX", "http://localhost/drupal/fedora/repository/");
+define("FEDORA_URL", "http://localhost:8080/");
 function do_curl($url, $return_to_variable = 1, $number_of_post_vars = 0, $post = NULL) {
   global $user;
   // Check if we are inside Drupal and there is a valid user.
@@ -66,7 +70,7 @@ and $object <info:islandora/islandora-system:def/pageinfo#isPageNumber> $page';
   $query_string = htmlentities(urlencode($query_string));
 
     $query_results = '';
-    $url = 'http://localhost:8080/fedora/risearch';//have to define the server here we don't have access to drupal variables/functions here
+    $url = FEDORA_URL.'fedora/risearch';//have to define the server here we don't have access to drupal variables/functions here
     $url .= "?type=tuples&flush=TRUE&format=Sparql&lang=itql&stream=on&query=" . $query_string;
     $query_results .= do_curl($url);
     $query_array = results_to_array($query_results);
@@ -98,13 +102,19 @@ and $object <info:islandora/islandora-system:def/pageinfo#isPageNumber> $page';
 
 // Create the BookReader object
 var structMap = new Array();
+var djatoka_prefix = '';
+var islandora_prefix = '';
 <?php
 foreach ($query_array as $key=>$value) {
 echo 'structMap['.$key.']= "'.substr($value,1).'";';
 }
+echo 'djatoka_prefix = "'.DJATOKA_PREFIX.'";';
+echo 'islandora_prefix = "'.ISLANDORA_PREFIX.'";';
 ?>
 br = new BookReader();
 br.structMap=structMap;
+br.islandora_prefix = islandora_prefix;
+br.djatoka_prefix = djatoka_prefix;
 // Return the width of a given page.  Here we assume all images are 800 pixels wide
 br.getPageWidth = function(index) {
     return 1600;
@@ -124,22 +134,11 @@ br.getPageURI = function(index, reduce, rotate) {
     var leafStr = br.structMap[index+1];//get the pid of the object from the struct map islandora specific
     var imgStr = (index+1).toString();
     //url below must be changed for now for each install
-    var url = 'http://localhost:8080/adore-djatoka/resolver?url_ver=Z39.88-2004&rft_id=http://localhost/drupal/fedora/repository/'+leafStr+'/JP2/outofthinair&svc_id=info:lanl-repo/svc/getRegion&svc_val_fmt=info:ofi/fmt:kev:mtx:jpeg2000&svc.format=image/png&svc.level=5&svc.rotate=0&svc.region=0,0,1600,2400';
+    var url = djatoka_prefix+islandora_prefix+leafStr+'/JP2/&svc_id=info:lanl-repo/svc/getRegion&svc_val_fmt=info:ofi/fmt:kev:mtx:jpeg2000&svc.format=image/png&svc.level=5&svc.rotate=0&svc.region=0,0,1600,2400';
+    //var url = 'http://localhost:8080/adore-djatoka/resolver?url_ver=Z39.88-2004&rft_id=http://localhost/drupal/fedora/repository/'+leafStr+'/JP2/&svc_id=info:lanl-repo/svc/getRegion&svc_val_fmt=info:ofi/fmt:kev:mtx:jpeg2000&svc.format=image/png&svc.level=5&svc.rotate=0&svc.region=0,0,1600,2400';
     return url;
 }
 
-br.getPageText = function (index){
-    var leafStr = br.structMap[index+1];//get the pid of the object from the struct map islandora specific
-    var imgStr = (index+1).toString();
-    //url below must be changed for now for each install
-  
-   $.get("http://localhost/drupal/fedora/repository/"+leafStr+"/OCR", function(result){
-    $("div").html(result);
-  });
-   
- //using drupal url if we wanted to go directly to fedora would have to use curl crossdomain issues
-   
-}
 br.getPid = function (index){
    var leafStr = br.structMap[index+1];//get the pid of the object from the struct map islandora specific
    return leafStr;
@@ -199,7 +198,7 @@ br.numLeafs = <?php echo count($query_array);?>;
 // Book title and the URL used for the book title link
 br.bookTitle=  '<?php echo $_GET['label'];?>';
 //book url should be created dynamically 
-br.bookUrl  = 'http://syn.lib.umanitoba.ca';
+br.bookUrl  = 'http://syn.lib.umanitoba.ca';//need to change this
 
 // Override the path used to find UI images
 br.imagesBaseURL = '../BookReader/images/';

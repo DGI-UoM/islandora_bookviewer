@@ -54,11 +54,13 @@ function BookReader() {
     this.prefetchedImgs = {}; //an object with numeric keys cooresponding to page index
     this.prefetchedTexts = {};//islandora specific
     this.structMap = null;  //islandora specific must be set in init. map of page numbers to pids
+    this.djatoka_prefix = null;
+    this.islandora_prefix = null;
     this.timer     = null;
     this.animating = false;
     this.auto      = false;
     this.autoTimer = null;
-    this.flipSpeed = 'fast';
+    this.flipSpeed = 'slow';
 
     this.twoPagePopUp = null;
     this.leafEdgeTmp  = null;
@@ -812,14 +814,16 @@ BookReader.prototype.drawLeafsTwoPageWithText = function() {
    //this.prefetchText(indexR);
     var scale = this.twoPage.scaledWR;
     var fontSize = parseFloat(scale/720);
+    var height = this.twoPage.height - 13;
+    var width = this.twoPage.scaledWR - 15;
    this.prefetchText(indexL);
     $(this.prefetchedTexts[indexL]).css({
         position: 'absolute',
         left:   this.twoPage.gutter+'px',
         right: '',
         top:    top+'px',
-        height: this.twoPage.height + 'px', // $$$ height forced the same for both pages
-        width:  this.twoPage.scaledWR + 'px',
+        height: height + 'px', // $$$ height forced the same for both pages
+        width:  width + 'px',
         "font-size": fontSize +'em',
         borderLeft: '1px solid black',
         zIndex: 2
@@ -2663,7 +2667,7 @@ BookReader.prototype.prefetchText = function(index) {
     div = document.createElement('div');
     div.id = 'BRpagetext';
     div.className = 'BRpagetext';// browser may rewrite src so we stash raw URI here
-    $(div).load("http://localhost/drupal/fedora/repository/"+pid+"/OCR");
+    $(div).load(this.islandora_prefix+pid+"/OCR");
     this.prefetchedTexts[index] = div;
     }
     
