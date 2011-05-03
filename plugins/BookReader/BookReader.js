@@ -54,6 +54,7 @@ function BookReader() {
     this.prefetchedImgs = {}; //an object with numeric keys cooresponding to page index
     this.prefetchedTexts = {};//islandora specific
     this.structMap = null;  //islandora specific must be set in init. map of page numbers to pids
+    this.bookPid = null;
     this.djatoka_prefix = null;
     this.islandora_prefix = null;
     this.timer     = null;
@@ -3234,11 +3235,23 @@ BookReader.prototype.printPage = function() {
     window.open(this.getPrintURI(), 'printpage', 'width=400, height=500, resizable=yes, scrollbars=yes, toolbar=yes, location=no');
 }
 
+BookReader.prototype.printBook = function() {
+    window.open(this.getBookURI(), 'printbook', 'width=400, height=500, resizable=yes, scrollbars=yes, toolbar=yes, location=no');
+}
+
+BookReader.prototype.getBookURI = function(){
+    var pid = this.bookPid;
+    return islandora_prefix+pid+'/PDF';
+}
+
 // Get print URI from current indices and mode
 BookReader.prototype.getPrintURI = function() {
     var indexToPrint;
     if (this.constMode2up == this.mode) {
-        indexToPrint = this.twoPage.currentIndexL;        
+        indexToPrint = this.twoPage.currentIndexL;
+        if(indexToPrint < 0 ){
+            indexToPrint = 0;
+        }
     } else {
         indexToPrint = this.firstIndex; // $$$ the index in the middle of the viewport would make more sense
     }
@@ -3511,7 +3524,7 @@ BookReader.prototype.initToolbar = function(mode, ui) {
         + "</span>"
         
         + "<span>"
-        +   "<a class='BRicon logo rollover' href='" + this.logoURL + "'>&nbsp;</a>"
+      //  +   "<a class='BRicon logo rollover' href='" + this.logoURL + "'>&nbsp;</a>" //uofm did not want this icon
         +   " <button class='BRicon rollover zoom_out' onclick='br.zoom(-1); return false;'/>" 
         +   "<button class='BRicon rollover zoom_in' onclick='br.zoom(1); return false;'/>"
         +   " <span class='label'>Zoom: <span id='BRzoom'>"+parseInt(100/this.reduce)+"</span></span>"
@@ -3522,6 +3535,11 @@ BookReader.prototype.initToolbar = function(mode, ui) {
         
         + "<span id='#BRbooktitle'>"
         +   "&nbsp;&nbsp;<a class='BRblack title' href='"+this.bookUrl+"' target='_blank'>"+this.bookTitle+"</a>"
+        + "</span>"
+    //the span below added for uofm
+        + "<span>"
+        +   " <button class='BRicon rollover one_page_pdf_mode' onclick='br.printPage(); return false;'/>"
+        +   " <button class='BRicon rollover two_page_pdf_mode' onclick='br.printBook(); return false;'/>"
         + "</span>"
         + "</div>");
     
@@ -3540,7 +3558,7 @@ BookReader.prototype.initToolbar = function(mode, ui) {
     this.bindToolbarNavHandlers(jToolbar);
     
     // Setup tooltips -- later we could load these from a file for i18n
-    var titles = { '.logo': 'Go to Archive.org',
+    var titles = { //'.logo': 'Go to Archive.org',// removed this as the icon is also commented out above
                    '.zoom_in': 'Zoom in',
                    '.zoom_out': 'Zoom out',
                    '.one_page_mode': 'One-page view',

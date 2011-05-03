@@ -1,12 +1,12 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <?php
 //update the three define statements below with your own urls
-//define("DJATOKA_PREFIX", "http://localhost:8080/adore-djatoka/resolver?url_ver=Z39.88-2004&rft_id=");
-//define("ISLANDORA_PREFIX", "http://localhost/drupal/fedora/repository/");
-//define("FEDORA_URL", "http://localhost:8080/");
-define("DJATOKA_PREFIX", "http://skadi.lib.umanitoba.ca:8080/adore-djatoka/resolver?url_ver=Z39.88-2004&rft_id=");
-define("ISLANDORA_PREFIX", "http://skadi.lib.umanitoba.ca/fedora/repository/");
-define("FEDORA_URL", "http://skadi.lib.umanitoba.ca:8080/");
+define("DJATOKA_PREFIX", "http://localhost:8080/adore-djatoka/resolver?url_ver=Z39.88-2004&rft_id=");
+define("ISLANDORA_PREFIX", "http://localhost/drupal/fedora/repository/");
+define("FEDORA_URL", "http://localhost:8080/");
+//define("DJATOKA_PREFIX", "http://skadi.lib.umanitoba.ca:8080/adore-djatoka/resolver?url_ver=Z39.88-2004&rft_id=");
+//define("ISLANDORA_PREFIX", "http://skadi.lib.umanitoba.ca/fedora/repository/");
+//define("FEDORA_URL", "http://skadi.lib.umanitoba.ca:8080/");
 function do_curl($url, $return_to_variable = 1, $number_of_post_vars = 0, $post = NULL) {
   global $user;
   // Check if we are inside Drupal and there is a valid user.
@@ -137,7 +137,7 @@ br.getPageURI = function(index, reduce, rotate) {
     var leafStr = br.structMap[index+1];//get the pid of the object from the struct map islandora specific
     var imgStr = (index+1).toString();
     //url below must be changed for now for each install
-    var url = djatoka_prefix+islandora_prefix+leafStr+'/JP2/&svc_id=info:lanl-repo/svc/getRegion&svc_val_fmt=info:ofi/fmt:kev:mtx:jpeg2000&svc.format=image/png&svc.level=5&svc.rotate=0&svc.region=0,0,1600,2400';
+    var url = djatoka_prefix+islandora_prefix+leafStr+'/JP2/&svc_id=info:lanl-repo/svc/getRegion&svc_val_fmt=info:ofi/fmt:kev:mtx:jpeg2000&svc.format=image/png&svc.level=3&svc.rotate=0&svc.region=0,0,1600,2400';
     //var url = 'http://localhost:8080/adore-djatoka/resolver?url_ver=Z39.88-2004&rft_id=http://localhost/drupal/fedora/repository/'+leafStr+'/JP2/&svc_id=info:lanl-repo/svc/getRegion&svc_val_fmt=info:ofi/fmt:kev:mtx:jpeg2000&svc.format=image/png&svc.level=5&svc.rotate=0&svc.region=0,0,1600,2400';
     return url;
 }
@@ -200,9 +200,12 @@ br.numLeafs = <?php echo count($query_array);?>;
 
 // Book title and the URL used for the book title link
 br.bookTitle=  '<?php echo $_GET['label'];?>';
+if (br.bookTitle.length > 100){
+  br.bookTitle =  br.bookTitle.substring(0,97)+'...';
+}
 //book url should be created dynamically 
-br.bookUrl  = 'http://syn.lib.umanitoba.ca';//need to change this
-
+br.bookUrl  = islandora_prefix+'<?php echo $_GET['pid'];?>';//'http://syn.lib.umanitoba.ca';//need to change this
+br.bookPid = '<?php echo $_GET['pid'];?>';
 // Override the path used to find UI images
 br.imagesBaseURL = '../BookReader/images/';
 
