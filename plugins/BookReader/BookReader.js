@@ -3238,10 +3238,11 @@ BookReader.prototype.printPage = function() {
 BookReader.prototype.fullscreen_toggle = function() 
 {
 //turn on fullscreen
-	var currentURL=window.location.url
-	if(currentURL.indexof("islandora_bookviewer")!=-1)
+	var currentURL=document.URL
+	
+	if(currentURL.indexOf("islandora_bookviewer")!=-1)
 	{
-		var mySite=this.islandora_prefix.substring(0,this.islandora_prefix.indexof('fedora/repository/'))
+		var mySite=this.islandora_prefix.substring(0,this.islandora_prefix.indexOf('fedora/repository/'))
 		window.location.assign(mySite+	'sites/all/modules/islandora_bookviewer/plugins/BookReaderDemo/index.php?pid='
 				+this.bookPid+'&label='+this.bookTitle+'#page/'+this.currentIndex()+'/mode/'+this.mode+'up');
 	}

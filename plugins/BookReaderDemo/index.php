@@ -1,12 +1,12 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <?php
 //update the three define statements below with your own urls
-define("DJATOKA_PREFIX", "http://localhost:8080/adore-djatoka/resolver?url_ver=Z39.88-2004&rft_id=");
-define("ISLANDORA_PREFIX", "http://localhost/drupal/fedora/repository/");
-define("FEDORA_URL", "http://localhost:8080/");
-//define("DJATOKA_PREFIX", "http://skadi.lib.umanitoba.ca:8080/adore-djatoka/resolver?url_ver=Z39.88-2004&rft_id=");
-//define("ISLANDORA_PREFIX", "http://skadi.lib.umanitoba.ca/fedora/repository/");
-//define("FEDORA_URL", "http://skadi.lib.umanitoba.ca:8080/");
+//define("DJATOKA_PREFIX", "http://localhost:8080/adore-djatoka/resolver?url_ver=Z39.88-2004&rft_id=");
+//define("ISLANDORA_PREFIX", "http://localhost/drupal/fedora/repository/");
+//define("FEDORA_URL", "http://localhost:8080/");
+define("DJATOKA_PREFIX", "http://skadi.lib.umanitoba.ca:8080/adore-djatoka/resolver?url_ver=Z39.88-2004&rft_id=");
+define("ISLANDORA_PREFIX", "http://skadi.lib.umanitoba.ca/fedora/repository/");
+define("FEDORA_URL", "http://skadi.lib.umanitoba.ca:8080/");
 function do_curl($url, $return_to_variable = 1, $number_of_post_vars = 0, $post = NULL) {
   global $user;
   // Check if we are inside Drupal and there is a valid user.
