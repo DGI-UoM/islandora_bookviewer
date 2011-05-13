@@ -3234,7 +3234,26 @@ BookReader.prototype.removeSearchHilites = function() {
 BookReader.prototype.printPage = function() {
     window.open(this.getPrintURI(), 'printpage', 'width=400, height=500, resizable=yes, scrollbars=yes, toolbar=yes, location=no');
 }
+//toggle fullscreen
+BookReader.prototype.fullscreen_toggle = function() 
+{
+//turn on fullscreen
+	var currentURL=window.location.url
+	if(currentURL.indexof("islandora_bookviewer")!=-1)
+	{
+		var mySite=this.islandora_prefix.substring(0,this.islandora_prefix.indexof('fedora/repository/'))
+		window.location.assign(mySite+	'sites/all/modules/islandora_bookviewer/plugins/BookReaderDemo/index.php?pid='
+				+this.bookPid+'&label='+this.bookTitle+'#page/'+this.currentIndex()+'/mode/'+this.mode+'up');
+	}
+//turn off fullscreen
+	else
+	{
+		window.location.assign(this.islandora_prefix+this.bookPid);
+	}
+	
+}
 
+//print a book
 BookReader.prototype.printBook = function() {
     window.open(this.getBookURI(), 'printbook', 'width=400, height=500, resizable=yes, scrollbars=yes, toolbar=yes, location=no');
 }
@@ -3536,10 +3555,13 @@ BookReader.prototype.initToolbar = function(mode, ui) {
         + "<span id='#BRbooktitle'>"
         +   "&nbsp;&nbsp;<a class='BRblack title' href='"+this.bookUrl+"' target='_blank'>"+this.bookTitle+"</a>"
         + "</span>"
-    //the span below added for uofm
+    //the span(s) below added for uofm
         + "<span>"
         +   " <button class='BRicon rollover one_page_pdf_mode' onclick='br.printPage(); return false;'/>"
         +   " <button class='BRicon rollover two_page_pdf_mode' onclick='br.printBook(); return false;'/>"
+        + "</span>"
+        + "<span>"
+        +   " <button class='BRicon rollover fullscreen_toggle' onclick='br.fullscreen_toggle(); return false;'/>"
         + "</span>"
         + "</div>");
     

@@ -176,6 +176,7 @@
 .BRicon.book_bottom { background: url(images/book_bottom_icon.png) no-repeat; }
 .BRicon.one_page_pdf_mode { background: url(images/one_page_pdf_icon.png) no-repeat; }
 .BRicon.two_page_pdf_mode { background: url(images/two_page_pdf_icon.png) no-repeat; }
+.BRicon.fullscreen_toggle { background: url(images/fullscreen_toggle.png) no-repeat; }
 
 
 .BRicon.play { background: url(images/control_play_icon.png) no-repeat; }

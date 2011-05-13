@@ -1,3 +1,3 @@
 Islandora book viewer.
 
-Uses the the archive.org bookviewer code
+Uses the archive.org bookviewer code
