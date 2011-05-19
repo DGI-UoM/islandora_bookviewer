@@ -8,7 +8,7 @@ class IslandoraBookviewer {
     module_load_include('inc', 'fedora_repository', 'api/fedora_item');
     module_load_include('inc', 'fedora_repository', 'CollectionClass');
     if (!empty($pid)) {
-      $this->pid = $pid;
+    	  $this->pid = $pid;
       $this->item = new Fedora_Item($pid);
     }
   }
@@ -36,37 +36,78 @@ class IslandoraBookviewer {
   function showBookStreams()
   {
      //get the book viewer iframe 
-    $html=$this->showBookViewer();
+    $viewer=$this->showBookViewer();
     
     //set up tabs
+    /*
     module_load_include('inc', 'fedora_repository', 'api/fedora_item');
     if (!empty($pid)) {
 
       $this->pid = $pid;
       $this->item = new Fedora_Item($pid);
-    }
+    }*/
     $tabs = array();
     $tabs = array('#type' => 'tabset');
     //note the fedora item
     
-    $item = new Fedora_Item($this->pid);
+    //get metadata info
+    $metadata = $this->getMetaData();
    
     //populate tabs
     $tabs['Description'] = array(
       '#type' => 'tabpage',
       '#title' => 'Description',
-      '#content' => $item->get_datastream_dissemination('MODS')
+      '#content' => $metadata
     );
         
     $tabs['View'] = array(
       '#type' => 'tabpage',
       '#title' => 'View',
-      '#content' => $html
+      '#content' => $viewer
     );
     //return the tabs for display
     return $tabs;
   }
-
+ /**
+   * @author: William Panting
+   * 
+   * @date: 19/05/2011
+   * 
+   * @return output: the html of data to display
+   * 
+   * Small modification of UoM's exif plugin
+   */
+  function getMetaData()
+  {
+    $output='';
+    $MODS = $this->item->get_datastream_dissemination('MODS'); 
+    if (trim($MODS) != '')  
+    {
+      $MODSDom = DOMDocument::loadXML($this->item->get_datastream_dissemination('MODS'));
+      if ($MODSDom != NULL) 
+      {
+        $description = $MODSDom->getElementsByTagName('*');
+        if ($description->length > 0) 
+        { 
+          $description=$description->item(0);
+          $output .= '<div class="fedora_technical_metadata"><ul>';
+          for ($i=0;$i<$description->childNodes->length;$i++)
+          { 
+            $name=$description->childNodes->item($i)->nodeName;
+            $value=$description->childNodes->item($i)->nodeValue;
+            if ($name != '#text'  && !preg_match('/^System\:.*$/',$name) && trim($value) != '') 
+            { 
+              list($type,$name) = preg_split('/\:/',$name);
+              $name = trim(preg_replace('/(?<!^)([A-Z][a-z]|(?<=[a-z])[A-Z])/'," $1", $name));
+              $output .= '<li><b>'.$name. '</b>:  '. $value .' </li>';
+            }
+          }
+          $output.='</ul></div>';
+        }
+      }
+    }
+    return $output;
+  }
 }
 
 ?>
