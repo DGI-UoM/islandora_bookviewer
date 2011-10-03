@@ -26,50 +26,55 @@ class IslandoraBookviewer {
     return $html;
   }
   
- /**
-   * @author: William Panting
-   * 
-   * @date: 16/05/2011
-   * 
-   * @return tabs: the html to display, in the form of a set of tabs
-   */
-  function showBookStreams()
-  {
-     //get the book viewer iframe 
-    $viewer=$this->showBookViewer();
-    
-    //set up tabs
-    /*
-    module_load_include('inc', 'fedora_repository', 'api/fedora_item');
-    if (!empty($pid)) {
-
-      $this->pid = $pid;
-      $this->item = new Fedora_Item($pid);
-    }*/
-    $tabs = array();
-    $tabs = array('#type' => 'tabset');
-    //note the fedora item
-    
-    //get metadata info
-    $metadata = $this->getMetaData();
+/**
+  * @author: William Panting
+  * 
+  * @date: 16/05/2011
+  * 
+  * @return tabs: the html to display, in the form of a set of tabs
+  */
+ function showBookStreams()
+ {
+    //get the book viewer iframe 
+   $viewer=$this->showBookViewer();
    
-    //populate tabs
-    $tabs['Description'] = array(
-      '#type' => 'tabpage',
-      '#title' => 'Description',
-      '#content' => $metadata,
-      '#weight' => 2
-    );
-        
-    $tabs['View'] = array(
-      '#type' => 'tabpage',
-      '#title' => 'View',
-      '#content' => $viewer,
-      '#weight' => 1
-    );
-    //return the tabs for display
-    return $tabs;
-  }
+   //set up tabs
+   
+   module_load_include('inc', 'fedora_repository', 'api/fedora_item');
+   if (!empty($pid)) {
+
+     $this->pid = $pid;
+     $this->item = new Fedora_Item($pid);
+   }
+
+   $tabset = array();
+
+   $tabset['my_tabset'] = array(
+     '#type' => 'tabset',
+   );
+   //note the fedora item
+   
+   //get metadata info
+   $metadata = $this->getMetaData();
+  
+   //populate tabs
+   $tabset['my_tabset']['Description'] = array(
+     '#type' => 'tabpage',
+     '#title' => 'Description',
+     '#content' => $metadata,
+     '#weight' => 2
+   );
+       
+   $tabset['my_tabset']['View'] = array(
+     '#type' => 'tabpage',
+     '#title' => 'View',
+     '#content' => $viewer,
+     '#weight' => 1
+   );
+   //return the tabs for display
+   return tabs_render($tabset);
+ }
+ 
  /**
    * @author: William Panting
    * 
