@@ -57,13 +57,15 @@ class IslandoraBookviewer {
     $tabs['Description'] = array(
       '#type' => 'tabpage',
       '#title' => 'Description',
-      '#content' => $metadata
+      '#content' => $metadata,
+      '#weight' => 2
     );
         
     $tabs['View'] = array(
       '#type' => 'tabpage',
       '#title' => 'View',
-      '#content' => $viewer
+      '#content' => $viewer,
+      '#weight' => 1
     );
     //return the tabs for display
     return $tabs;
